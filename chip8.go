@@ -25,34 +25,34 @@ var chip8Fontset = [80]byte{
 
 type Chip8 struct {
 	// Opcode
-	opcode uint16
+	Opcode uint16
 
 	// Memory
 	// TODO: Make this private and create loadMemory func
 	Memory [4096]byte
 
 	// Registers (V0 to VF)
-	v [16]byte
+	V [16]byte
 
 	// Index Register
-	indexRegister uint16
+	IndexRegister uint16
 
 	// Program Counter
-	programCounter uint16
+	ProgramCounter uint16
 
 	// Graphics
-	gfx [64 * 32]byte
+	Gfx [64 * 32]byte
 
 	// Timers
-	delayTimer byte
-	soundTimer byte
+	DelayTimer byte
+	SoundTimer byte
 
 	// Stack
-	stack [16]uint16
-	stackPointer uint16
+	Stack [16]uint16
+	StackPointer uint16
 
 	// Key Input
-	key [16]byte
+	Key [16]byte
 }
 
 func NewChip8() *Chip8 {
@@ -60,7 +60,7 @@ func NewChip8() *Chip8 {
 	// Go already initializes all number types to 0, so not much to initialize here.
 	
 	// Initialize pc and fontset
-	c8.programCounter = 0x200
+	c8.ProgramCounter = 0x200
 	for i := 0; i < 80; i++ {
 		c8.Memory[i] = chip8Fontset[i]
 	}
@@ -74,7 +74,7 @@ func (c8* Chip8) EmulateCycle() {
 	combine two sections of memory and increment the programCounter by two for each
 	instruction.
 	*/
-	c8.opcode = uint16(c8.Memory[c8.programCounter]) << 8 | uint16(c8.Memory[c8.programCounter + 1])
+	c8.Opcode = uint16(c8.Memory[c8.ProgramCounter]) << 8 | uint16(c8.Memory[c8.ProgramCounter + 1])
 
 	/*
 	The following is an explanation for each opcode.  Taken from the Chip8 wikipedia page.
@@ -115,9 +115,9 @@ func (c8* Chip8) EmulateCycle() {
 	FX55	Stores V0 to VX in memory starting at address I.
 	FX65	Fills V0 to VX with values from memory starting at address I.
 	*/
-	switch c8.opcode & 0xF000 {
+	switch c8.Opcode & 0xF000 {
 	case 0x0000:
-		switch c8.opcode {
+		switch c8.Opcode {
 		case 0x00E0:
 			//TODO
 			//00E0	Clears the screen.
@@ -125,7 +125,7 @@ func (c8* Chip8) EmulateCycle() {
 			//TODO
 			//00EE	Returns from a subroutine.
 		default:
-			fmt.Printf("%X not implemeted\n", c8.opcode)
+			fmt.Printf("%X not implemeted\n", c8.Opcode)
 		}
 	case 0x1000:
 		//TODO
@@ -140,12 +140,12 @@ func (c8* Chip8) EmulateCycle() {
 		//TODO
 		//4XNN	Skips the next instruction if VX doesn't equal NN.
 	case 0x5000:
-		switch c8.opcode & 0x000F {
+		switch c8.Opcode & 0x000F {
 		case 0x0000:
 			//TODO
 			//5XY0	Skips the next instruction if VX equals VY.
 		default:
-			fmt.Printf("%X not implemeted\n", c8.opcode)
+			fmt.Printf("%X not implemeted\n", c8.Opcode)
 		}
 	case 0x6000:
 		//TODO
@@ -154,7 +154,7 @@ func (c8* Chip8) EmulateCycle() {
 		//TODO
 		//7XNN	Adds NN to VX.
 	case 0x8000:
-		switch c8.opcode & 0x000F {
+		switch c8.Opcode & 0x000F {
 		case 0x0000:
 			//TODO
 			//8XY0	Sets VX to the value of VY.
@@ -183,19 +183,19 @@ func (c8* Chip8) EmulateCycle() {
 			//TODO
 			//8XYE	Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
 		default:
-			fmt.Printf("%X not implemeted\n", c8.opcode)
+			fmt.Printf("%X not implemeted\n", c8.Opcode)
 		}
 	case 0x9000:
-		switch c8.opcode & 0x000F {
+		switch c8.Opcode & 0x000F {
 		case 0x0000:
 			//TODO
 			//9XY0	Skips the next instruction if VX doesn't equal VY.
 		default:
-			fmt.Printf("%X not implemeted\n", c8.opcode)
+			fmt.Printf("%X not implemeted\n", c8.Opcode)
 		}
 	case 0xA000:
-		//TODO
 		//ANNN	Sets I to the address NNN.
+		c8.IndexRegister = c8.Opcode & 0x0FFF
 	case 0xB000:
 		//TODO
 		//BNNN	Jumps to the address NNN plus V0.
@@ -206,7 +206,7 @@ func (c8* Chip8) EmulateCycle() {
 		//TODO
 		//DXYN	Sprites stored in memory at location in index register (I), maximum 8bits wide. Wraps around the screen. If when drawn, clears a pixel, register VF is set to 1 otherwise it is zero. All drawing is XOR drawing (i.e. it toggles the screen pixels)
 	case 0xE000:
-		switch c8.opcode & 0x00FF {
+		switch c8.Opcode & 0x00FF {
 		case 0x009E:
 			//TODO
 			//EX9E	Skips the next instruction if the key stored in VX is pressed.
@@ -214,10 +214,10 @@ func (c8* Chip8) EmulateCycle() {
 			//TODO
 			//EXA1	Skips the next instruction if the key stored in VX isn't pressed.
 		default:
-			fmt.Printf("%X not implemeted\n", c8.opcode)
+			fmt.Printf("%X not implemeted\n", c8.Opcode)
 		}
 	case 0xF000:
-		switch c8.opcode & 0x00FF {
+		switch c8.Opcode & 0x00FF {
 		case 0x0007:
 			//TODO
 			//FX07	Sets VX to the value of the delay timer.
@@ -236,7 +236,7 @@ func (c8* Chip8) EmulateCycle() {
 		case 0x0029:
 			//TODO
 			//FX29	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
-		case 0x0033
+		case 0x0033:
 			//TODO
 			//FX33	Stores the Binary-coded decimal representation of VX, with the most significant of three digits at the address in I, the middle digit at I plus 1, and the least significant digit at I plus 2. (In other words, take the decimal representation of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.)
 		case 0x0055:
@@ -246,10 +246,11 @@ func (c8* Chip8) EmulateCycle() {
 			//TODO
 			//FX65	Fills V0 to VX with values from memory starting at address I.
 		default:
-			fmt.Printf("%X not implemeted\n", c8.opcode)
+			fmt.Printf("%X not implemeted\n", c8.Opcode)
 		}	
 	default:	
-		fmt.Printf("%X not implemeted\n", c8.opcode)
+		fmt.Printf("%X not implemeted\n", c8.Opcode)
+	c8.ProgramCounter += 2
 	}
 
 }
