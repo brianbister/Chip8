@@ -195,6 +195,7 @@ func (c8* Chip8) EmulateCycle() {
 	case 0xA000:
 		//ANNN	Sets I to the address NNN.
 		c8.IndexRegister = c8.Opcode & 0x0FFF
+		c8.ProgramCounter += 2
 	case 0xB000:
 		//TODO
 		//BNNN	Jumps to the address NNN plus V0.
@@ -249,7 +250,6 @@ func (c8* Chip8) EmulateCycle() {
 		}	
 	default:	
 		fmt.Printf("%X not implemeted\n", c8.Opcode)
-	c8.ProgramCounter += 2
 	}
 
 }
