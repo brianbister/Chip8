@@ -28,7 +28,6 @@ type Chip8 struct {
 	Opcode uint16
 
 	// Memory
-	// TODO: Make this private and create loadMemory func
 	Memory [4096]byte
 
 	// Registers (V0 to VF)
