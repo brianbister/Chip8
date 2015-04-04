@@ -159,6 +159,7 @@ func (c8* Chip8) EmulateCycle() {
 			x := c8.Opcode >> 8 & 0x000F
 			y := c8.Opcode >> 4 & 0x000F
 			c8.V[x] = c8.V[y]
+			c8.ProgramCounter += 2
 		case 0x0001:
 			//TODO
 			//8XY1	Sets VX to VX or VY.
